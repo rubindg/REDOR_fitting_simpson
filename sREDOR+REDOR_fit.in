@@ -8,7 +8,7 @@ package require opt 1.0
 # spin-system for the methyl group is obtained using SIMMOL-VMD from the geometry defined in 
 # J. Am. Chem. Soc. 127, 3652–3653 (2005) 
 
-# variable d is teh fractoin of the half-rotor period by which the p pulse is shifted as described in J. Magn. Reson. 210, 246–259 (2011) for shifted-REDOR
+# variable d is teh fractoin of the half-rotor period by which the pi pulse is shifted as described in J. Magn. Reson. 210, 246–259 (2011) for shifted-REDOR
 
 # Select either shifted-REDOR or REDOR based on your data
 
