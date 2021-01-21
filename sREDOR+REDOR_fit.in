@@ -13,11 +13,14 @@ package require opt 1.0
 # Select either shifted-REDOR or REDOR based on your data
 
 spinsys {
-   channels 13C 1H
-   nuclei 13C 1H 1H 1H
-   dipole 1 4 -8800  0 	144.06 	87.92
-   dipole 1 3 -8800  0 	104.70 -47.17
-   dipole 1 2 -8800  0 	46.57 	49.66
+  channels 13C 1H
+  nuclei 13C 1H 1H 1H
+  dipole 1 4 -10960 0 	144.06 	87.92
+  dipole 1 3 -10960 0 	104.70 -47.17
+  dipole 1 2 -10960 0 	46.57 	49.66
+  dipole 2 3 -9760	0	19.98 	21.78
+  dipole 3 4 -9760	0 	62.12 	100.18
+  dipole 2 4 -9760	0	118.19 	122.51
 }
 
 par {
