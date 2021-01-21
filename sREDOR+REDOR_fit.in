@@ -1,0 +1,151 @@
+# Fitting algorithm for shifted-REDOR
+# package opt-1.0  for fitting can be obtained from 
+# https://inano.au.dk/about/research-centers/nmr/software/tcl-libraries/
+
+lappend ::auto_path ./opt-1.0 
+package require opt 1.0
+
+# spin-system for the methyl group is obtained using SIMMOL-VMD from the geometry defined in 
+# J. Am. Chem. Soc. 127, 3652–3653 (2005) 
+
+# variable d is teh fractoin of the half-rotor period by which the p pulse is shifted as described in J. Magn. Reson. 210, 246–259 (2011) for shifted-REDOR
+
+# Select either shifted-REDOR or REDOR based on your data
+
+spinsys {
+   channels 13C 1H
+   nuclei 13C 1H 1H 1H
+   dipole 1 4 -8800  0 	144.06 	87.92
+   dipole 1 3 -8800  0 	104.70 -47.17
+   dipole 1 2 -8800  0 	46.57 	49.66
+}
+
+par {
+   np               16
+   spin_rate        35000
+   start_operator   I2x+I3x+I4x
+   detect_operator  I2p+I3p+I4p
+   method           direct
+   crystal_file     rep320
+   gamma_angles     8
+   sw               500
+   variable d		6.0	
+   variable rf      125e3
+   variable n	    0.5
+}
+
+###### Pulse seuquence for shifted-REDOR #############################
+
+proc pulseq {} {
+   global par
+   
+   set t180 [expr 0.5e6/$par(rf)]
+   set tr [expr 1.0e6/$par(spin_rate)-$t180]
+   set d2 [expr $tr-$par(d)-$t180]
+   reset
+  
+   delay $par(d)
+   pulse $t180 0 0 $par(rf) x
+   delay $d2
+   pulse $t180 0 0 $par(rf) y
+   store 1
+   reset
+   acq
+   
+   delay $par(d)
+   pulse $t180 0 x $par(rf) y
+   delay $d2
+   pulse $t180 $par(rf) x 0 x
+   prop 1
+   store 2
+   acq
+
+   for {set i 2} {$i < $par(np)} {incr i} {
+      reset
+      prop 1
+      prop 2
+      prop 1
+	  store 2
+	  acq
+   }
+}
+
+#################################################################
+
+############## Pulse sequence for REDOR #########################
+
+proc pulseq {} {
+   global par
+   
+   set t180 [expr 0.5e6/$par(rf)]
+   set t90 [expr $t180/2]
+   set tr [expr 1.0e6/$par(spin_rate)-$t180]
+   set tr2 [expr 0.5e6/$par(spin_rate)-$t180]
+   reset
+  
+   delay $tr2
+   pulse $t180 0 0 $par(rf) x
+   delay $tr2
+   pulse $t180 0 0 $par(rf) x
+   store 1
+   reset
+   acq
+   
+   delay $tr2
+   pulse $t180 0 x $par(rf) x
+   delay $tr2
+   pulse $t180 $par(rf) x 0 x
+   prop 1
+   store 2
+   acq
+
+   for {set i 2} {$i < $par(np)} {incr i} {
+      reset
+      prop 1
+      prop 2
+      prop 1
+	  store 2
+	  acq
+   }
+}
+
+#################################################################
+
+proc rms {{save 0}} {
+   global par
+   
+   incr par(index)
+   set f [fsimpson [list \
+     [list dipole_ave_1_2_aniso $opt::dipole12]\
+	 [list dipole_ave_1_4_aniso $opt::dipole14]\
+	 [list dipole_ave_1_3_aniso $opt::dipole13]\
+	 ]]
+   fphase $f -scale [expr 1.0/12.0]
+   set rms [frms $f $par(g) -re]
+   
+   if {$save} {
+       		puts [format "dipole12: %8.2f" $opt::dipole12]
+			puts [format "dipole14: %8.2f" $opt::dipole14]
+			puts [format "dipole13: %8.2f" $opt::dipole13]
+			puts [format "RMS: %8.2f" $rms]			
+       	  	fsave $f $par(name),$par(index).fid
+     }     
+     return $rms
+}
+
+
+proc main {} {
+   global par
+   set g [fload your_data_points.fid]
+   set par(g) $g
+   
+   opt::function rms
+   opt::newpar dipole12 -8800 100
+   opt::newpar dipole14 -8800 100
+   opt::newpar dipole13 -88000 100
+	
+	opt::minimize 1e-6
+ 	puts "Final ($par(index) iterations)"
+ 	rms 1
+}
+
