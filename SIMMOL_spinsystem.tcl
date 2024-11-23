@@ -10,4 +10,8 @@ set H_m1Ac8_zone [atomselect $m "index [$m1Ac8_zone list] and name \"H.*\""]    
 set C_m1Ac8_zone [atomselect $m "index [$m1Ac8_zone list] and name \"C.*\""]    # Carbons at ≤4Å of C8 from MA7
 set N_m1Ac8_zone [atomselect $m "index [$m1Ac8_zone list] and name \"N.*\""]    # Nitrogens at ≤4Å of C8 from MA7
 set dip_m1Ac8-Call [mdipole $m1Ac8 $C_m1Ac8_zone 0AA 0Hz]
+set dip_m1Ac8-Hall [mdipole $m1Ac8 $H_m1Ac8_zone 0AA 0Hz]
+set dip_m1Ac8-Nall [mdipole $m1Ac8 $N_m1Ac8_zone 0AA 0Hz]
+set dip_Hall [mdipole $H_m1Ac8_zone $H_m1Ac8_zone 0AA 0Hz]
+set dip_Call [mdipole $C_m1Ac8_zone $C_m1Ac8_zone 0AA 0Hz]
 msavespinsys m1Ac8-Call.spinsys -simpson
